@@ -1,0 +1,64 @@
+---
+interface Props { locale: string; categories: any[]; wa: string; tiktok: string; instagram: string; settings: Record<string,string>; }
+const { locale, categories, wa, tiktok, instagram } = Astro.props;
+const phone = wa.replace(/[^\d]/g, '');
+---
+<footer class="site-footer">
+  <div class="container-app footer-grid">
+    <div>
+      <a href={`/${locale}/`} class="logo"><div class="logo-mark">O1</div><div class="logo-text"><strong>Opt1 KZ</strong><small>Wholesale from 1 pc</small></div></a>
+      <p class="footer-about">Оптовые цены от 1 штуки. Качественные товары с доставкой по Казахстану. Оплата через Kaspi, поддержка в WhatsApp.</p>
+      <div class="footer-social">
+        <a href={tiktok} target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 7.5a4.5 4.5 0 01-3.36-1.52A4.48 4.48 0 0114.5 3h-2.9v11.2a2.3 2.3 0 11-2.3-2.3c.25 0 .5.04.73.11V9.05a5.2 5.2 0 00-.73-.05 5.2 5.2 0 105.2 5.2V8.34a7.35 7.35 0 004.5 1.52V7.5z"/></svg></a>
+        <a href={instagram} target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.5 2h9A5.5 5.5 0 0122 7.5v9a5.5 5.5 0 01-5.5 5.5h-9A5.5 5.5 0 012 16.5v-9A5.5 5.5 0 017.5 2zm0 2A3.5 3.5 0 004 7.5v9A3.5 3.5 0 007.5 20h9a3.5 3.5 0 003.5-3.5v-9A3.5 3.5 0 0016.5 4h-9zm10 1.5a1 1 0 110 2 1 1 0 010-2zM12 7a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/></svg></a>
+        <a href={`https://wa.me/${phone}`} target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.66 15l-1.2 4.38 4.49-1.18A10 10 0 1012 2zm0 18.2a8.18 8.18 0 01-4.17-1.14l-.3-.18-2.66.7.71-2.6-.2-.31A8.2 8.2 0 1112 20.2zm4.5-6.14c-.24-.12-1.45-.72-1.67-.8-.23-.08-.39-.12-.55.12-.17.25-.64.8-.78.96-.14.17-.29.19-.53.07-.25-.13-1.04-.39-1.98-1.23-.73-.65-1.23-1.46-1.37-1.7-.15-.25-.02-.38.1-.5.12-.11.25-.29.37-.43.12-.15.16-.25.24-.41.08-.17.04-.31-.02-.43-.06-.13-.55-1.33-.76-1.82-.2-.48-.4-.41-.55-.42h-.47c-.17 0-.43.06-.66.31-.22.25-.86.84-.86 2.05 0 1.21.88 2.38 1 2.54.13.17 1.74 2.66 4.22 3.73.59.25 1.05.41 1.41.52.59.19 1.13.16 1.55.1.48-.07 1.45-.59 1.66-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.47-.28z"/></svg></a>
+      </div>
+    </div>
+    <div>
+      <h4>Каталог</h4>
+      <ul>{categories.slice(0,6).map(c => <li><a href={`/${locale}/category/${c.slug}/`}>{c[`name_${locale}`] || c.name_ru}</a></li>)}</ul>
+    </div>
+    <div>
+      <h4>Информация</h4>
+      <ul>
+        <li><a href={`/${locale}/`}>Главная</a></li>
+        <li><a href={`https://wa.me/${phone}`} target="_blank" rel="noopener">WhatsApp поддержка</a></li>
+        <li><span>Оплата: Kaspi</span></li>
+        <li><span>Доставка: по Казахстану</span></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Контакты</h4>
+      <ul>
+        <li><a href={`https://wa.me/${phone}`} target="_blank" rel="noopener">{wa}</a></li>
+        <li><a href={tiktok} target="_blank" rel="noopener">TikTok</a></li>
+        <li><a href={instagram} target="_blank" rel="noopener">Instagram</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="container-app footer-bottom">
+    <span>© 2026 Opt1 KZ. Все права защищены.</span>
+    <div class="pay-badges"><span class="pay-badge">Kaspi</span><span class="pay-badge">WhatsApp</span></div>
+  </div>
+</footer>
+<style>
+  .site-footer{margin-top:64px;background:#fff;border-top:1px solid #E5E9EF;padding:56px 0 0}
+  .footer-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr 1.2fr;gap:40px;padding-bottom:40px}
+  .logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none}
+  .logo-mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#1A73E8,#4DA3FF);color:#fff;font-size:18px;font-weight:800}
+  .logo-text{display:flex;flex-direction:column;line-height:1;gap:3px}
+  .logo-text strong{font-size:24px;color:#111827}.logo-text small{font-size:11px;color:#667085;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+  .footer-about{color:#667085;font-size:14px;line-height:1.7;margin:16px 0 20px;max-width:320px}
+  .footer-social{display:flex;gap:10px}
+  .footer-social a{width:42px;height:42px;border-radius:12px;border:1px solid #E5E9EF;display:grid;place-items:center;color:#344054}
+  .footer-social a:hover{background:#111827;color:#fff;border-color:#111827}
+  .footer-social svg{width:20px;height:20px}
+  .site-footer h4{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#111827;margin-bottom:16px}
+  .site-footer ul{list-style:none;display:flex;flex-direction:column;gap:10px;padding:0;margin:0}
+  .site-footer li a,.site-footer li span{font-size:14px;color:#667085;text-decoration:none}
+  .site-footer li a:hover{color:#1A73E8}
+  .footer-bottom{padding:20px 0;border-top:1px solid #E5E9EF;display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:13px;color:#667085}
+  .pay-badges{display:flex;gap:8px}.pay-badge{padding:6px 12px;border-radius:8px;background:#F0F3F6;font-weight:700;font-size:12px;color:#475467}
+  @media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:760px){.site-footer{margin-top:48px;padding-top:40px}.footer-grid{grid-template-columns:1fr;gap:28px}.footer-bottom{flex-direction:column;align-items:flex-start}}
+</style>

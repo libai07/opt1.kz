@@ -1,0 +1,124 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { q } from '../../../db/queries';
+import { formatKZT } from '../../../lib/money';
+
+const { locale, id } = Astro.params as { locale: 'ru'|'kk'|'zh'; id: string };
+Astro.locals.locale = locale;
+const env = Astro.locals.runtime.env;
+const t = Astro.locals.t;
+
+let product: any = null;
+let settings: Record<string,string> = {};
+try {
+  [product, settings] = await Promise.all([q(env.DB).getProductById(id, locale), q(env.DB).getSettings()]);
+} catch (e) { console.error(e); }
+if (!product) return Astro.redirect(`/${locale}/`, 302);
+
+const wa = settings.whatsapp_number || env.WHATSAPP_NUMBER || '+77000000000';
+const waPhone = wa.replace(/[^\d]/g, '');
+const waMsg = encodeURIComponent(`Здравствуйте! Интересует товар: ${product.title} (${product.sku})`);
+---
+<Layout title={`${product.title} — Opt1 KZ`} description={product.description?.slice(0, 160)}>
+  <section class="section" style="padding-top:32px">
+    <div class="container-app">
+      <div class="breadcrumbs">
+        <a href={`/${locale}/`}>Главная</a> <span>/</span>
+        {product.category_slug && <><a href={`/${locale}/category/${product.category_slug}/`}>{product.category_name}</a> <span>/</span></>}
+        <span>{product.title}</span>
+      </div>
+      <div class="product-layout">
+        <div class="gallery card" style="transform:none">
+          <div class="main-img">{product.category_icon || '📦'}</div>
+        </div>
+        <div class="info">
+          <div class="p-cat">{product.category_name || 'Товар'}</div>
+          <h1>{product.title}</h1>
+          <div class="meta-row">
+            <span class={product.stock > 0 ? 'in-stock' : 'out-stock'}>{product.stock > 0 ? t('product.in_stock') : t('product.out_of_stock')}</span>
+            <span class="sku">{t('product.sku')}: {product.sku}</span>
+          </div>
+          <div class="price-row">
+            {product.old_price_tiyin && <span class="old">{formatKZT(product.old_price_tiyin, locale)}</span>}
+            <span class="price">{formatKZT(product.price_tiyin, locale)}</span>
+          </div>
+          {product.description && <div class="desc"><h3>{t('product.description')}</h3><p>{product.description}</p></div>}
+
+          <form id="order-form" class="order-box">
+            <h3>{t('order.title')}</h3>
+            <input type="hidden" name="product_id" value={product.id} />
+            <div class="form-grid">
+              <label><span>{t('order.name')}</span><input class="field" name="buyer_name" required /></label>
+              <label><span>{t('order.phone')}</span><input class="field" name="buyer_phone" required placeholder="+77001234567" /></label>
+            </div>
+            <div class="form-grid">
+              <label><span>{t('order.city')}</span><input class="field" name="city" required /></label>
+              <label><span>Кол-во</span><input class="field" name="qty" type="number" min="1" value="1" required /></label>
+            </div>
+            <label><span>{t('order.address')}</span><input class="field" name="address" required /></label>
+            <label><span>{t('order.comment')}</span><textarea class="field" name="comment"></textarea></label>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="submit-btn">{t('order.submit')}</button>
+              <a href={`https://wa.me/${waPhone}?text=${waMsg}`} target="_blank" rel="noopener" class="btn btn-wa">WhatsApp</a>
+            </div>
+            <div id="order-msg" class="order-msg"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const form = document.getElementById('order-form') as HTMLFormElement | null;
+  const msg = document.getElementById('order-msg') as HTMLElement | null;
+  const btn = document.getElementById('submit-btn') as HTMLButtonElement | null;
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!btn || !msg) return;
+    btn.disabled = true; btn.textContent = '...';
+    msg.textContent = ''; msg.className = 'order-msg';
+    const fd = new FormData(form);
+    const body: Record<string, any> = Object.fromEntries(fd.entries());
+    body.qty = Number(body.qty || 1);
+    try {
+      const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const data = await res.json() as any;
+      if (!res.ok) throw new Error(data.error?.message || data.error || 'Ошибка');
+      msg.className = 'order-msg ok';
+      msg.innerHTML = `Заказ <b>${data.order_id}</b> принят! <a href="${data.whatsapp_url}" target="_blank" rel="noopener">Открыть WhatsApp</a>`;
+      form.reset();
+    } catch (err: any) {
+      msg.className = 'order-msg err';
+      msg.textContent = err.message || 'Ошибка при оформлении заказа';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Оформить заказ';
+    }
+  });
+</script>
+
+<style>
+  .breadcrumbs{font-size:14px;color:#667085;margin-bottom:20px;display:flex;gap:8px;flex-wrap:wrap}.breadcrumbs a{color:#1A73E8;text-decoration:none}
+  .product-layout{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+  .gallery{padding:0;overflow:hidden}
+  .main-img{aspect-ratio:1/1;display:grid;place-items:center;font-size:120px;background:linear-gradient(180deg,#F8FAFC,#EEF2F7)}
+  .p-cat{font-size:12px;font-weight:700;color:#667085;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+  h1{font-size:clamp(28px,3vw,40px);line-height:1.2;letter-spacing:-.03em;font-weight:800;margin:0 0 12px}
+  .meta-row{display:flex;gap:16px;font-size:14px;color:#667085;margin-bottom:20px}
+  .in-stock{color:#16A34A;font-weight:600}.out-stock{color:#DC2626;font-weight:600}.sku{font-weight:500}
+  .price-row{display:flex;align-items:baseline;gap:12px;margin-bottom:24px}
+  .price{font-size:36px;font-weight:800;color:#111827;letter-spacing:-.03em}
+  .old{font-size:20px;color:#98A2B3;text-decoration:line-through}
+  .desc{margin-bottom:28px;padding:20px 0;border-top:1px solid #E5E9EF;border-bottom:1px solid #E5E9EF}
+  .desc h3{font-size:16px;font-weight:800;margin:0 0 8px}.desc p{margin:0;color:#475467;line-height:1.7;white-space:pre-line}
+  .order-box{background:#fff;border:1px solid #E5E9EF;border-radius:20px;padding:24px}
+  .order-box h3{font-size:20px;font-weight:800;margin:0 0 16px}
+  .order-box label{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  .order-box label span{font-size:13px;font-weight:700;color:#344054}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-actions{display:flex;gap:12px;margin-top:6px;flex-wrap:wrap}
+  .order-msg{margin-top:14px;font-size:14px;font-weight:600}
+  .order-msg.ok{color:#166534}.order-msg.err{color:#DC2626}.order-msg a{color:#1A73E8}
+  @media(max-width:900px){.product-layout{grid-template-columns:1fr;gap:24px}.main-img{font-size:96px}}
+  @media(max-width:760px){.form-grid{grid-template-columns:1fr;gap:0}.price{font-size:30px}}
+</style>

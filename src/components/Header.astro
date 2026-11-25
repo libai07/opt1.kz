@@ -1,0 +1,64 @@
+---
+import { localeNames, locales, type Locale } from '../lib/i18n';
+interface Props { locale: Locale; categories: any[]; wa: string; tiktok: string; instagram: string; }
+const { locale, categories, wa, tiktok, instagram } = Astro.props;
+const phone = wa.replace(/[^\d]/g, '');
+const path = Astro.url.pathname.replace(/^\/(ru|kk|zh)/, '') || '/';
+---
+<div class="topbar">
+  <div class="container-app topbar-inner">
+    <div class="topbar-left">
+      <span>Оптовые цены от 1 шт. · Доставка по Казахстану</span>
+    </div>
+    <div class="topbar-right">
+      <div class="social-mini">
+        <a href={tiktok} target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 7.5a4.5 4.5 0 01-3.36-1.52A4.48 4.48 0 0114.5 3h-2.9v11.2a2.3 2.3 0 11-2.3-2.3c.25 0 .5.04.73.11V9.05a5.2 5.2 0 00-.73-.05 5.2 5.2 0 105.2 5.2V8.34a7.35 7.35 0 004.5 1.52V7.5z"/></svg></a>
+        <a href={instagram} target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.5 2h9A5.5 5.5 0 0122 7.5v9a5.5 5.5 0 01-5.5 5.5h-9A5.5 5.5 0 012 16.5v-9A5.5 5.5 0 017.5 2zm0 2A3.5 3.5 0 004 7.5v9A3.5 3.5 0 007.5 20h9a3.5 3.5 0 003.5-3.5v-9A3.5 3.5 0 0016.5 4h-9zm10 1.5a1 1 0 110 2 1 1 0 010-2zM12 7a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/></svg></a>
+      </div>
+      <div class="lang">
+        {locales.map(l => <a href={`/${l}${path}`} class:list={['lang-btn', { active: l === locale }]}>{localeNames[l]}</a>)}
+      </div>
+    </div>
+  </div>
+</div>
+<header class="site-header">
+  <div class="container-app header-inner">
+    <a href={`/${locale}/`} class="logo">
+      <div class="logo-mark">O1</div>
+      <div class="logo-text"><strong>Opt1 KZ</strong><small>Wholesale from 1 pc</small></div>
+    </a>
+    <nav class="main-nav">
+      <a href={`/${locale}/`}>Каталог</a>
+      {categories.slice(0,4).map(c => <a href={`/${locale}/category/${c.slug}/`}>{c[`name_${locale}`] || c.name_ru}</a>)}
+    </nav>
+    <div class="header-actions">
+      <a href={`https://wa.me/${phone}`} target="_blank" rel="noopener" class="btn btn-wa btn-sm desktop-only">WhatsApp</a>
+    </div>
+  </div>
+</header>
+<style>
+  .topbar{background:#111827;color:#fff;font-size:13px;font-weight:500}
+  .topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0;min-height:42px}
+  .topbar-left{color:#dbe3ee}
+  .topbar-right{display:flex;align-items:center;gap:14px}
+  .social-mini{display:inline-flex;gap:8px}
+  .social-mini a{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.08);color:#fff}
+  .social-mini a:hover{background:rgba(255,255,255,.18)}
+  .social-mini svg{width:15px;height:15px}
+  .lang{display:inline-flex;gap:4px;background:rgba(255,255,255,.08);padding:3px;border-radius:10px}
+  .lang-btn{padding:4px 10px;border-radius:7px;font-size:12px;font-weight:700;color:#cfd8e3;text-decoration:none}
+  .lang-btn.active{background:#fff;color:#111827}
+  .site-header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(229,233,239,.7)}
+  .header-inner{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:14px 0}
+  .logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none}
+  .logo-mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#1A73E8,#4DA3FF);color:#fff;font-size:18px;font-weight:800;box-shadow:0 8px 20px rgba(26,115,232,.3)}
+  .logo-text{display:flex;flex-direction:column;line-height:1;gap:3px}
+  .logo-text strong{font-size:24px;color:#111827}
+  .logo-text small{font-size:11px;color:#667085;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+  .main-nav{display:flex;gap:20px;align-items:center}
+  .main-nav a{font-size:14px;font-weight:700;color:#344054;text-decoration:none}
+  .main-nav a:hover{color:#1A73E8}
+  .btn-sm{height:42px;padding:0 16px;border-radius:12px;font-size:13px}
+  @media(max-width:900px){.main-nav{display:none}}
+  @media(max-width:760px){.topbar-left span{font-size:12px}.desktop-only{display:none!important}.logo-mark{width:38px;height:38px;font-size:16px}.logo-text strong{font-size:21px}.logo-text small{display:none}}
+</style>

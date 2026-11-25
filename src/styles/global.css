@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #F6F7F9;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F0F3F6;
+  --color-text: #18212B;
+  --color-muted: #667085;
+  --color-line: #E5E9EF;
+  --color-primary: #1A73E8;
+  --color-primary-dark: #155FC0;
+  --color-accent: #FF5A1F;
+  --color-success: #16A34A;
+  --color-dark: #111827;
+  --font-sans: 'Manrope', system-ui, -apple-system, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-sans); background: var(--color-bg); color: var(--color-text); }
+.container-app { width: min(1240px, calc(100% - 40px)); margin-inline: auto; }
+@media (max-width: 760px) { .container-app { width: min(1240px, calc(100% - 28px)); } }
+
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; height:48px; padding:0 20px; border-radius:14px; font-weight:700; font-size:14px; transition:.2s; white-space:nowrap; }
+.btn-primary { background:var(--color-primary); color:#fff; box-shadow:0 8px 20px rgba(26,115,232,.25); }
+.btn-primary:hover { background:var(--color-primary-dark); transform:translateY(-1px); }
+.btn-outline { background:#fff; border:1px solid var(--color-line); color:var(--color-text); }
+.btn-outline:hover { border-color:#cfd8e3; background:#fbfcfd; }
+.btn-wa { background:#25D366; color:#fff; }
+.btn-wa:hover { background:#1fb859; }
+.btn-dark { background:var(--color-dark); color:#fff; }
+.btn-dark:hover { background:#000; }
+.card { background:#fff; border:1px solid var(--color-line); border-radius:20px; overflow:hidden; transition:.25s; }
+.card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(16,24,40,.12); border-color:#dbe3ee; }
+.line-clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+input, textarea, select { font: inherit; }
+.field { width:100%; height:48px; border-radius:14px; border:1px solid var(--color-line); background:#fff; padding:0 16px; outline:none; transition:.2s; }
+.field:focus { border-color:#bfd7ff; box-shadow:0 0 0 4px rgba(26,115,232,.1); }
+textarea.field { height:auto; min-height:110px; padding:14px 16px; resize:vertical; }

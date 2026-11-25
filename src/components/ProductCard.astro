@@ -1,0 +1,56 @@
+---
+import { formatKZT } from '../lib/money';
+interface Props { product: any; locale: string; }
+const { product: p, locale } = Astro.props;
+const badgeMap: Record<string, { text: string; cls: string }> = {
+  hit: { text: 'Хит', cls: 'badge-hit' },
+  new: { text: 'New', cls: 'badge-new' },
+  sale: { text: 'Sale', cls: 'badge-sale' },
+};
+const badge = p.badge ? badgeMap[p.badge] : null;
+---
+<article class="card product-card">
+  <a href={`/${locale}/product/${p.id}/`} class="product-img">
+    <div class="img-placeholder">{p.category_icon || '📦'}</div>
+    {badge && <div class="p-badges"><span class={`p-badge ${badge.cls}`}>{badge.text}</span></div>}
+  </a>
+  <div class="product-body">
+    <div class="p-cat">{p.category_name || 'Товар'}</div>
+    <a href={`/${locale}/product/${p.id}/`} class="p-title"><h3>{p.title}</h3></a>
+    <div class="p-meta">
+      <span class={p.stock > 0 ? 'in-stock' : 'out-stock'}>{p.stock > 0 ? 'В наличии' : 'Нет в наличии'}</span>
+      <span>Арт: {p.sku}</span>
+    </div>
+    <div class="p-bottom">
+      <div class="price">
+        {p.old_price_tiyin && <span class="old">{formatKZT(p.old_price_tiyin, locale)}</span>}
+        <strong>{formatKZT(p.price_tiyin, locale)}</strong>
+      </div>
+      <a href={`/${locale}/product/${p.id}/`} class="add-cart" aria-label="Открыть товар">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+</article>
+<style>
+  .product-card{display:flex;flex-direction:column}
+  .product-img{position:relative;aspect-ratio:1/1;background:#F3F5F8;overflow:hidden;display:block}
+  .img-placeholder{width:100%;height:100%;display:grid;place-items:center;font-size:64px;transition:transform .4s;background:linear-gradient(180deg,#F8FAFC,#EEF2F7)}
+  .product-card:hover .img-placeholder{transform:scale(1.04)}
+  .p-badges{position:absolute;top:12px;left:12px;display:flex;gap:6px}
+  .p-badge{padding:5px 10px;border-radius:8px;font-size:11px;font-weight:800;text-transform:uppercase}
+  .badge-hit{background:#FF5A1F;color:#fff}.badge-new{background:#111827;color:#fff}.badge-sale{background:#DCFCE7;color:#166534}
+  .product-body{padding:18px;display:flex;flex-direction:column;flex:1}
+  .p-cat{font-size:12px;font-weight:700;color:#667085;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+  .p-title{text-decoration:none;color:inherit}
+  .p-title h3{font-size:15px;font-weight:700;line-height:1.45;margin:0 0 10px;color:#18212B;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .p-meta{display:flex;gap:12px;font-size:12px;color:#667085;margin-bottom:14px;font-weight:500}
+  .in-stock{color:#16A34A;font-weight:600}.out-stock{color:#DC2626;font-weight:600}
+  .p-bottom{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .price{display:flex;flex-direction:column}
+  .price strong{font-size:20px;font-weight:800;letter-spacing:-.02em;color:#111827}
+  .price .old{font-size:13px;color:#98A2B3;text-decoration:line-through;font-weight:500;margin-bottom:-2px}
+  .add-cart{width:44px;height:44px;border-radius:13px;background:#111827;color:#fff;display:grid;place-items:center;transition:.2s;flex:0 0 auto}
+  .add-cart:hover{background:#1A73E8;transform:scale(1.04)}
+  @media(max-width:760px){.product-body{padding:14px}.p-title h3{font-size:14px}.p-meta{display:none}.price strong{font-size:18px}.add-cart{width:40px;height:40px;border-radius:11px}}
+</style>

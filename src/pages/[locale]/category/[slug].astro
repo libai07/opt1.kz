@@ -1,0 +1,58 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import ProductCard from '../../../components/ProductCard.astro';
+import { q } from '../../../db/queries';
+
+const { locale, slug } = Astro.params as { locale: 'ru'|'kk'|'zh'; slug: string };
+Astro.locals.locale = locale;
+const env = Astro.locals.runtime.env;
+const t = Astro.locals.t;
+
+let category: any = null;
+let categories: any[] = [];
+let products: any[] = [];
+try {
+  [category, categories, products] = await Promise.all([
+    q(env.DB).getCategoryBySlug(slug),
+    q(env.DB).listCategories(true),
+    q(env.DB).listProducts({ locale, categorySlug: slug, activeOnly: true, limit: 24 }),
+  ]);
+} catch (e) { console.error(e); }
+
+if (!category) return Astro.redirect(`/${locale}/`, 302);
+const catName = category[`name_${locale}`] || category.name_ru;
+---
+<Layout title={`${catName} — Opt1 KZ`} description={`${catName} — купить по оптовой цене от 1 шт. в Opt1 KZ`}>
+  <section class="section" style="padding-top:32px">
+    <div class="container-app">
+      <div class="breadcrumbs"><a href={`/${locale}/`}>Главная</a> <span>/</span> <span>{catName}</span></div>
+      <div class="section-head">
+        <div><h1>{category.icon} {catName}</h1><p>{products.length} товаров</p></div>
+      </div>
+      <div class="cats" style="margin-bottom:24px">
+        <a href={`/${locale}/`} class="cat"><span class="emoji">🔥</span> Все товары</a>
+        {categories.map(c => (
+          <a href={`/${locale}/category/${c.slug}/`} class:list={['cat', { active: c.slug === slug }]}>
+            <span class="emoji">{c.icon || '📦'}</span> {c[`name_${locale}`] || c.name_ru}
+          </a>
+        ))}
+      </div>
+      {products.length > 0 ? (
+        <div class="products-grid">{products.map(p => <ProductCard product={p} locale={locale} />)}</div>
+      ) : (
+        <div class="empty-state"><div class="empty-icon">📦</div><h3>{t('products.empty')}</h3><p>{t('products.empty_hint')}</p></div>
+      )}
+    </div>
+  </section>
+</Layout>
+<style>
+  .breadcrumbs{font-size:14px;color:#667085;margin-bottom:16px;display:flex;gap:8px}.breadcrumbs a{color:#1A73E8;text-decoration:none}
+  .section-head h1{font-size:clamp(28px,3vw,40px);font-weight:800;margin:0;letter-spacing:-.03em}.section-head p{color:#667085;margin:6px 0 0}
+  .section-head{margin-bottom:24px}
+  .cats{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}.cat{display:inline-flex;align-items:center;gap:10px;padding:10px 18px 10px 10px;background:#fff;border:1px solid #E5E9EF;border-radius:14px;font-size:14px;font-weight:700;white-space:nowrap;color:#344054;text-decoration:none}
+  .cat.active{background:#111827;color:#fff;border-color:#111827}.cat .emoji{width:36px;height:36px;border-radius:10px;background:#F0F3F6;display:grid;place-items:center;font-size:18px}.cat.active .emoji{background:rgba(255,255,255,.15)}
+  .products-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  .empty-state{text-align:center;padding:56px 20px;background:#fff;border:1px solid #E5E9EF;border-radius:20px}.empty-icon{font-size:56px;margin-bottom:12px}.empty-state h3{margin:0 0 8px;font-size:22px}.empty-state p{color:#667085;margin:0}
+  @media(max-width:1024px){.products-grid{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:760px){.products-grid{grid-template-columns:repeat(2,1fr);gap:12px}}
+</style>
